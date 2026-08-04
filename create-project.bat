@@ -25,14 +25,15 @@ if /I "%installExpress%"=="Y" goto setupProject
 if /I "%installExpress%"=="YES" goto setupProject
 
 echo.
-echo Creating a basic project folder...
+echo Creating basic project folder...
+
 mkdir "%projectName%" 2>nul
 
 echo.
 echo Project folder created successfully!
+
 tree "%projectName%" /F
 
-echo.
 pause
 exit /b
 
@@ -47,17 +48,19 @@ set /p languageChoice="Enter your choice (1 or 2): "
 if "%languageChoice%"=="1" (
 set "language=javascript"
 set "extension=js"
+set "mainFile=index.js"
 goto selectDatabase
 )
 
 if "%languageChoice%"=="2" (
 set "language=typescript"
 set "extension=ts"
+set "mainFile=index.ts"
 goto selectDatabase
 )
 
 echo.
-echo Invalid choice. Please select 1 or 2.
+echo Invalid choice.
 goto setupProject
 
 :selectDatabase
@@ -73,31 +76,41 @@ set /p databaseChoice="Enter your choice (1-5): "
 
 if "%databaseChoice%"=="1" (
 set "database=sql"
+set "databasePackage=mysql2"
+set "databaseConfig=sql"
 goto selectStorage
 )
 
 if "%databaseChoice%"=="2" (
 set "database=sqlite"
+set "databasePackage=better-sqlite3"
+set "databaseConfig=sqlite"
 goto selectStorage
 )
 
 if "%databaseChoice%"=="3" (
 set "database=mongodb"
+set "databasePackage=mongoose"
+set "databaseConfig=mongodb"
 goto selectStorage
 )
 
 if "%databaseChoice%"=="4" (
 set "database=supabase"
+set "databasePackage=@supabase/supabase-js"
+set "databaseConfig=supabase"
 goto selectStorage
 )
 
 if "%databaseChoice%"=="5" (
 set "database=none"
+set "databasePackage="
+set "databaseConfig="
 goto selectStorage
 )
 
 echo.
-echo Invalid choice. Please select a number from 1 to 5.
+echo Invalid choice.
 goto selectDatabase
 
 :selectStorage
@@ -110,16 +123,18 @@ set /p storageChoice="Enter your choice (1 or 2): "
 
 if "%storageChoice%"=="1" (
 set "storage=cloudinary"
+set "storagePackage=cloudinary multer"
 goto selectPackageManager
 )
 
 if "%storageChoice%"=="2" (
 set "storage=none"
+set "storagePackage="
 goto selectPackageManager
 )
 
 echo.
-echo Invalid choice. Please select 1 or 2.
+echo Invalid choice.
 goto selectStorage
 
 :selectPackageManager
@@ -141,14 +156,14 @@ goto createProject
 )
 
 echo.
-echo Invalid choice. Please select 1 or 2.
+echo Invalid choice.
 goto selectPackageManager
 
 :createProject
 
 echo.
 echo =========================================
-echo Creating your Express project...
+echo Creating project...
 echo =========================================
 echo.
 
@@ -163,7 +178,7 @@ mkdir "%projectName%\routes"
 cd /d "%projectName%"
 
 echo.
-echo Initializing the project...
+echo Initializing project...
 
 if /I "%packageManager%"=="bun" (
 call bun init -y
@@ -174,7 +189,7 @@ call npm init -y
 )
 
 echo.
-echo Installing Express, dotenv, and nodemon...
+echo Installing Express and dotenv...
 
 if /I "%packageManager%"=="bun" (
 call bun add express dotenv
@@ -184,6 +199,38 @@ call bun add -d nodemon
 if /I "%packageManager%"=="npm" (
 call npm install express dotenv
 call npm install -D nodemon
+)
+
+echo.
+echo Installing selected database...
+
+if not "%databasePackage%"=="" (
+if /I "%packageManager%"=="bun" (
+call bun add %databasePackage%
+)
+
+```
+if /I "%packageManager%"=="npm" (
+    call npm install %databasePackage%
+)
+```
+
+)
+
+echo.
+echo Installing selected storage...
+
+if not "%storagePackage%"=="" (
+if /I "%packageManager%"=="bun" (
+call bun add %storagePackage%
+)
+
+```
+if /I "%packageManager%"=="npm" (
+    call npm install %storagePackage%
+)
+```
+
 )
 
 if /I "%language%"=="typescript" (
@@ -197,77 +244,6 @@ if /I "%packageManager%"=="bun" (
 
 if /I "%packageManager%"=="npm" (
     call npm install -D typescript tsx @types/node @types/express
-)
-```
-
-)
-
-echo.
-echo Installing selected database packages...
-
-if /I "%database%"=="sql" (
-if /I "%packageManager%"=="bun" (
-call bun add mysql2
-)
-
-```
-if /I "%packageManager%"=="npm" (
-    call npm install mysql2
-)
-```
-
-)
-
-if /I "%database%"=="sqlite" (
-if /I "%packageManager%"=="bun" (
-call bun add better-sqlite3
-)
-
-```
-if /I "%packageManager%"=="npm" (
-    call npm install better-sqlite3
-)
-```
-
-)
-
-if /I "%database%"=="mongodb" (
-if /I "%packageManager%"=="bun" (
-call bun add mongoose
-)
-
-```
-if /I "%packageManager%"=="npm" (
-    call npm install mongoose
-)
-```
-
-)
-
-if /I "%database%"=="supabase" (
-if /I "%packageManager%"=="bun" (
-call bun add @supabase/supabase-js
-)
-
-```
-if /I "%packageManager%"=="npm" (
-    call npm install @supabase/supabase-js
-)
-```
-
-)
-
-if /I "%storage%"=="cloudinary" (
-echo.
-echo Installing Cloudinary packages...
-
-```
-if /I "%packageManager%"=="bun" (
-    call bun add cloudinary multer
-)
-
-if /I "%packageManager%"=="npm" (
-    call npm install cloudinary multer
 )
 ```
 
@@ -308,29 +284,13 @@ echo DB_PASSWORD=
 )
 
 if /I "%database%"=="sqlite" (
-(
-echo SQLITE_PATH=./database.sqlite
-) >> ".env"
-
-```
-(
-    echo SQLITE_PATH=./database.sqlite
-) >> ".env.example"
-```
-
+echo SQLITE_PATH=./database.sqlite>> ".env"
+echo SQLITE_PATH=./database.sqlite>> ".env.example"
 )
 
 if /I "%database%"=="mongodb" (
-(
-echo MONGODB_URI=mongodb://127.0.0.1:27017/your_database
-) >> ".env"
-
-```
-(
-    echo MONGODB_URI=mongodb://127.0.0.1:27017/your_database
-) >> ".env.example"
-```
-
+echo MONGODB_URI=mongodb://127.0.0.1:27017/your_database>> ".env"
+echo MONGODB_URI=mongodb://127.0.0.1:27017/your_database>> ".env.example"
 )
 
 if /I "%database%"=="supabase" (
@@ -372,8 +332,6 @@ echo Creating .gitignore...
 echo node_modules/
 echo .env
 echo dist/
-echo bun.lock
-echo bun.lockb
 ) > ".gitignore"
 
 echo.
@@ -389,7 +347,7 @@ echo }
 ) > "nodemon.json"
 
 echo.
-echo Creating project files...
+echo Creating folders and files...
 
 type nul > "controllers\controller.%extension%"
 type nul > "config\jwt.%extension%"
@@ -421,7 +379,7 @@ type nul > "config\cloudinary.%extension%"
 )
 
 echo.
-echo Creating Express server...
+echo Creating Express main server...
 
 if /I "%language%"=="javascript" (
 (
@@ -445,7 +403,7 @@ echo.
 echo app.listen(PORT, (^) =^> {
 echo     console.log(`Server is running at http://localhost:${PORT}`^);
 echo }^);
-) > "server.js"
+) > "index.js"
 )
 
 if /I "%language%"=="typescript" (
@@ -454,7 +412,7 @@ echo import "dotenv/config";
 echo import express, { Request, Response } from "express";
 echo.
 echo const app = express(^);
-echo const PORT: number = Number(process.env.PORT^) ^|^| 3000;
+echo const PORT = Number(process.env.PORT^) ^|^| 3000;
 echo.
 echo app.use(express.json(^)^);
 echo app.use(express.urlencoded({ extended: true }^)^);
@@ -469,82 +427,43 @@ echo.
 echo app.listen(PORT, (^) =^> {
 echo     console.log(`Server is running at http://localhost:${PORT}`^);
 echo }^);
-) > "server.ts"
+) > "index.ts"
 )
 
 if /I "%language%"=="typescript" (
-echo.
-echo Creating tsconfig.json...
-
-```
 (
-    echo {
-    echo   "compilerOptions": {
-    echo     "target": "ES2020",
-    echo     "module": "CommonJS",
-    echo     "moduleResolution": "Node",
-    echo     "esModuleInterop": true,
-    echo     "strict": true,
-    echo     "skipLibCheck": true,
-    echo     "forceConsistentCasingInFileNames": true,
-    echo     "outDir": "./dist"
-    echo   },
-    echo   "include": ["**/*.ts"],
-    echo   "exclude": ["node_modules", "dist"]
-    echo }
+echo {
+echo   "compilerOptions": {
+echo     "target": "ES2020",
+echo     "module": "CommonJS",
+echo     "moduleResolution": "Node",
+echo     "esModuleInterop": true,
+echo     "strict": true,
+echo     "skipLibCheck": true,
+echo     "outDir": "./dist"
+echo   },
+echo   "include": ["**/*.ts"],
+echo   "exclude": ["node_modules", "dist"]
+echo }
 ) > "tsconfig.json"
-```
-
-)
-
-echo.
-echo Adding package scripts...
-
-if /I "%language%"=="javascript" (
-if /I "%packageManager%"=="bun" (
-call bunx json -I -f package.json -e "this.scripts={dev:'nodemon server.js',start:'bun server.js'}"
-)
-
-```
-if /I "%packageManager%"=="npm" (
-    call npx json -I -f package.json -e "this.scripts={dev:'nodemon server.js',start:'node server.js'}"
-)
-```
-
-)
-
-if /I "%language%"=="typescript" (
-if /I "%packageManager%"=="bun" (
-call bunx json -I -f package.json -e "this.scripts={dev:'nodemon --exec tsx server.ts',start:'tsx server.ts',build:'tsc'}"
-)
-
-```
-if /I "%packageManager%"=="npm" (
-    call npx json -I -f package.json -e "this.scripts={dev:'nodemon --exec tsx server.ts',start:'tsx server.ts',build:'tsc'}"
-)
-```
-
 )
 
 echo.
 echo =========================================
-echo       PROJECT CREATED SUCCESSFULLY!
+echo PROJECT CREATED SUCCESSFULLY!
 echo =========================================
 echo.
-echo Project Name: %projectName%
+echo Project: %projectName%
 echo Language: %language%
 echo Database: %database%
 echo Storage: %storage%
 echo Package Manager: %packageManager%
 echo.
-echo To open the project:
+echo Open the project:
 echo cd %projectName%
 echo.
-echo To start development mode:
+echo Start development mode:
 echo %packageManager% run dev
-echo.
-echo Your server will run at:
-echo http://localhost:3000
 echo.
 
 cd ..
