@@ -1,5 +1,7 @@
 # Express Instant
 
+[![npm version](https://badge.fury.io/js/express-fastexp.svg)](https://www.npmjs.com/package/express-fastexp)
+
 A powerful CLI tool designed to make backend development easier by automating the creation of Express.js projects.
 
 ## Features
