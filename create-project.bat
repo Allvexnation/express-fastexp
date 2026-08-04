@@ -25,9 +25,7 @@ if /I "%installExpress%"=="Y" goto setupProject
 if /I "%installExpress%"=="YES" goto setupProject
 
 echo.
-echo Project folder will be created without Express.
-echo.
-
+echo Creating a basic project folder...
 mkdir "%projectName%" 2>nul
 
 echo.
@@ -150,7 +148,7 @@ goto selectPackageManager
 
 echo.
 echo =========================================
-echo Creating your project...
+echo Creating your Express project...
 echo =========================================
 echo.
 
@@ -164,10 +162,11 @@ mkdir "%projectName%\routes"
 
 cd /d "%projectName%"
 
+echo.
 echo Initializing the project...
 
 if /I "%packageManager%"=="bun" (
-bun init -y
+call bun init -y
 )
 
 if /I "%packageManager%"=="npm" (
@@ -175,14 +174,16 @@ call npm init -y
 )
 
 echo.
-echo Installing Express...
+echo Installing Express, dotenv, and nodemon...
 
 if /I "%packageManager%"=="bun" (
-bun add express
+call bun add express dotenv
+call bun add -d nodemon
 )
 
 if /I "%packageManager%"=="npm" (
-call npm install express
+call npm install express dotenv
+call npm install -D nodemon
 )
 
 if /I "%language%"=="typescript" (
@@ -191,11 +192,11 @@ echo Installing TypeScript packages...
 
 ```
 if /I "%packageManager%"=="bun" (
-    bun add -d typescript @types/node @types/express tsx
+    call bun add -d typescript tsx @types/node @types/express
 )
 
 if /I "%packageManager%"=="npm" (
-    call npm install -D typescript @types/node @types/express tsx
+    call npm install -D typescript tsx @types/node @types/express
 )
 ```
 
@@ -206,7 +207,7 @@ echo Installing selected database packages...
 
 if /I "%database%"=="sql" (
 if /I "%packageManager%"=="bun" (
-bun add mysql2
+call bun add mysql2
 )
 
 ```
@@ -219,7 +220,7 @@ if /I "%packageManager%"=="npm" (
 
 if /I "%database%"=="sqlite" (
 if /I "%packageManager%"=="bun" (
-bun add better-sqlite3
+call bun add better-sqlite3
 )
 
 ```
@@ -232,7 +233,7 @@ if /I "%packageManager%"=="npm" (
 
 if /I "%database%"=="mongodb" (
 if /I "%packageManager%"=="bun" (
-bun add mongoose
+call bun add mongoose
 )
 
 ```
@@ -245,7 +246,7 @@ if /I "%packageManager%"=="npm" (
 
 if /I "%database%"=="supabase" (
 if /I "%packageManager%"=="bun" (
-bun add @supabase/supabase-js
+call bun add @supabase/supabase-js
 )
 
 ```
@@ -258,11 +259,11 @@ if /I "%packageManager%"=="npm" (
 
 if /I "%storage%"=="cloudinary" (
 echo.
-echo Installing Cloudinary...
+echo Installing Cloudinary packages...
 
 ```
 if /I "%packageManager%"=="bun" (
-    bun add cloudinary multer
+    call bun add cloudinary multer
 )
 
 if /I "%packageManager%"=="npm" (
@@ -273,7 +274,122 @@ if /I "%packageManager%"=="npm" (
 )
 
 echo.
-echo Creating starter files...
+echo Creating environment files...
+
+(
+echo PORT=3000
+echo NODE_ENV=development
+) > ".env"
+
+(
+echo PORT=3000
+echo NODE_ENV=development
+) > ".env.example"
+
+if /I "%database%"=="sql" (
+(
+echo DB_HOST=localhost
+echo DB_PORT=3306
+echo DB_NAME=your_database
+echo DB_USER=root
+echo DB_PASSWORD=
+) >> ".env"
+
+```
+(
+    echo DB_HOST=localhost
+    echo DB_PORT=3306
+    echo DB_NAME=your_database
+    echo DB_USER=root
+    echo DB_PASSWORD=
+) >> ".env.example"
+```
+
+)
+
+if /I "%database%"=="sqlite" (
+(
+echo SQLITE_PATH=./database.sqlite
+) >> ".env"
+
+```
+(
+    echo SQLITE_PATH=./database.sqlite
+) >> ".env.example"
+```
+
+)
+
+if /I "%database%"=="mongodb" (
+(
+echo MONGODB_URI=mongodb://127.0.0.1:27017/your_database
+) >> ".env"
+
+```
+(
+    echo MONGODB_URI=mongodb://127.0.0.1:27017/your_database
+) >> ".env.example"
+```
+
+)
+
+if /I "%database%"=="supabase" (
+(
+echo SUPABASE_URL=your_supabase_url
+echo SUPABASE_ANON_KEY=your_supabase_anon_key
+) >> ".env"
+
+```
+(
+    echo SUPABASE_URL=your_supabase_url
+    echo SUPABASE_ANON_KEY=your_supabase_anon_key
+) >> ".env.example"
+```
+
+)
+
+if /I "%storage%"=="cloudinary" (
+(
+echo CLOUDINARY_CLOUD_NAME=your_cloud_name
+echo CLOUDINARY_API_KEY=your_api_key
+echo CLOUDINARY_API_SECRET=your_api_secret
+) >> ".env"
+
+```
+(
+    echo CLOUDINARY_CLOUD_NAME=your_cloud_name
+    echo CLOUDINARY_API_KEY=your_api_key
+    echo CLOUDINARY_API_SECRET=your_api_secret
+) >> ".env.example"
+```
+
+)
+
+echo.
+echo Creating .gitignore...
+
+(
+echo node_modules/
+echo .env
+echo dist/
+echo bun.lock
+echo bun.lockb
+) > ".gitignore"
+
+echo.
+echo Creating nodemon.json...
+
+(
+echo {
+echo   "watch": ["."],
+echo   "ext": "%extension%,json",
+echo   "ignore": ["node_modules", "dist"],
+echo   "delay": "500"
+echo }
+) > "nodemon.json"
+
+echo.
+echo Creating project files...
 
 type nul > "controllers\controller.%extension%"
 type nul > "config\jwt.%extension%"
@@ -304,26 +420,108 @@ if /I "%storage%"=="cloudinary" (
 type nul > "config\cloudinary.%extension%"
 )
 
+echo.
+echo Creating Express server...
+
 if /I "%language%"=="javascript" (
-type nul > "server.js"
+(
+echo require("dotenv"^).config(^);
+echo.
+echo const express = require("express"^);
+echo.
+echo const app = express(^);
+echo const PORT = process.env.PORT ^|^| 3000;
+echo.
+echo app.use(express.json(^)^);
+echo app.use(express.urlencoded({ extended: true }^)^);
+echo.
+echo app.get("/", (req, res^) =^> {
+echo     res.status(200^).json({
+echo         message: "Express server is running!",
+echo         environment: process.env.NODE_ENV
+echo     }^);
+echo }^);
+echo.
+echo app.listen(PORT, (^) =^> {
+echo     console.log(`Server is running at http://localhost:${PORT}`^);
+echo }^);
+) > "server.js"
 )
 
 if /I "%language%"=="typescript" (
-type nul > "server.ts"
+(
+echo import "dotenv/config";
+echo import express, { Request, Response } from "express";
+echo.
+echo const app = express(^);
+echo const PORT: number = Number(process.env.PORT^) ^|^| 3000;
+echo.
+echo app.use(express.json(^)^);
+echo app.use(express.urlencoded({ extended: true }^)^);
+echo.
+echo app.get("/", (req: Request, res: Response^) =^> {
+echo     res.status(200^).json({
+echo         message: "Express TypeScript server is running!",
+echo         environment: process.env.NODE_ENV
+echo     }^);
+echo }^);
+echo.
+echo app.listen(PORT, (^) =^> {
+echo     console.log(`Server is running at http://localhost:${PORT}`^);
+echo }^);
+) > "server.ts"
+)
+
+if /I "%language%"=="typescript" (
+echo.
+echo Creating tsconfig.json...
 
 ```
 (
     echo {
     echo   "compilerOptions": {
     echo     "target": "ES2020",
-    echo     "module": "NodeNext",
-    echo     "moduleResolution": "NodeNext",
+    echo     "module": "CommonJS",
+    echo     "moduleResolution": "Node",
     echo     "esModuleInterop": true,
     echo     "strict": true,
-    echo     "skipLibCheck": true
-    echo   }
+    echo     "skipLibCheck": true,
+    echo     "forceConsistentCasingInFileNames": true,
+    echo     "outDir": "./dist"
+    echo   },
+    echo   "include": ["**/*.ts"],
+    echo   "exclude": ["node_modules", "dist"]
     echo }
 ) > "tsconfig.json"
+```
+
+)
+
+echo.
+echo Adding package scripts...
+
+if /I "%language%"=="javascript" (
+if /I "%packageManager%"=="bun" (
+call bunx json -I -f package.json -e "this.scripts={dev:'nodemon server.js',start:'bun server.js'}"
+)
+
+```
+if /I "%packageManager%"=="npm" (
+    call npx json -I -f package.json -e "this.scripts={dev:'nodemon server.js',start:'node server.js'}"
+)
+```
+
+)
+
+if /I "%language%"=="typescript" (
+if /I "%packageManager%"=="bun" (
+call bunx json -I -f package.json -e "this.scripts={dev:'nodemon --exec tsx server.ts',start:'tsx server.ts',build:'tsc'}"
+)
+
+```
+if /I "%packageManager%"=="npm" (
+    call npx json -I -f package.json -e "this.scripts={dev:'nodemon --exec tsx server.ts',start:'tsx server.ts',build:'tsc'}"
+)
 ```
 
 )
@@ -338,6 +536,15 @@ echo Language: %language%
 echo Database: %database%
 echo Storage: %storage%
 echo Package Manager: %packageManager%
+echo.
+echo To open the project:
+echo cd %projectName%
+echo.
+echo To start development mode:
+echo %packageManager% run dev
+echo.
+echo Your server will run at:
+echo http://localhost:3000
 echo.
 
 cd ..
