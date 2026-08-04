@@ -108,7 +108,8 @@ async function mainMenu() {
 }
 
 async function createNewProject(config = {}) {
-  const { projectName: cliProjectName, language: cliLanguage } = config;
+  const { projectName: initialProjectName, language: cliLanguage } = config;
+  let cliProjectName = initialProjectName;
   
   console.clear();
   console.log();
@@ -118,36 +119,43 @@ async function createNewProject(config = {}) {
   console.log();
 
   let projectName;
-  if (cliProjectName) {
-    projectName = cliProjectName;
-    console.log(chalk.green(`Project name: ${projectName}`));
+  let projectPath;
+  let pathValid = false;
+
+  while (!pathValid) {
+    if (cliProjectName) {
+      projectName = cliProjectName;
+      console.log(chalk.green(`Project name: ${projectName}`));
+      console.log();
+    } else {
+      const result = await inquirer.prompt([
+        {
+          type: 'input',
+          name: 'projectName',
+          message: 'Enter your project name:',
+          validate: (input) => input.trim() !== '' || 'Project name cannot be empty'
+        }
+      ]);
+      projectName = result.projectName;
+    }
+
+    const nameSpinner = ora({
+      text: chalk.cyan('Validating project name...'),
+      color: 'cyan'
+    }).start();
+    await new Promise(resolve => setTimeout(resolve, 500));
+    nameSpinner.succeed(chalk.green('Project name validated!'));
     console.log();
-  } else {
-    const result = await inquirer.prompt([
-      {
-        type: 'input',
-        name: 'projectName',
-        message: 'Enter your project name:',
-        validate: (input) => input.trim() !== '' || 'Project name cannot be empty'
-      }
-    ]);
-    projectName = result.projectName;
-  }
 
-  const nameSpinner = ora({
-    text: chalk.cyan('Validating project name...'),
-    color: 'cyan'
-  }).start();
-  await new Promise(resolve => setTimeout(resolve, 500));
-  nameSpinner.succeed(chalk.green('Project name validated!'));
-  console.log();
+    projectPath = path.join(process.cwd(), projectName);
 
-  const projectPath = path.join(process.cwd(), projectName);
-
-  if (await fs.pathExists(projectPath)) {
-    console.log(chalk.red(`A folder named "${projectName}" already exists.`));
-    await mainMenu();
-    return;
+    if (await fs.pathExists(projectPath)) {
+      console.log(chalk.red(`A folder named "${projectName}" already exists.`));
+      console.log(chalk.yellow('Please enter a different project name.'));
+      console.log();
+    } else {
+      pathValid = true;
+    }
   }
 
   const pathSpinner = ora({
