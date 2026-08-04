@@ -1,5 +1,5 @@
 {
-  "name": "express-instant",
+  "name": "express-fastexp",
   "version": "1.0.0",
   "description": "A powerful tool designed to make backend development easier by automating the creation of Express.js projects",
   "main": "index.js",
