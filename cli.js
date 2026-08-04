@@ -74,22 +74,18 @@ async function mainMenu() {
   }
 
   printHeader();
-  
-  console.log(chalk.cyan('[1] ') + 'Create new project');
-  console.log(chalk.cyan('[2] ') + 'Start a project');
-  console.log(chalk.cyan('[3] ') + 'Credits');
-  console.log(chalk.cyan('[4] ') + 'Exit');
-  console.log();
 
   const { choice } = await inquirer.prompt([
     {
-      type: 'input',
+      type: 'list',
       name: 'choice',
-      message: 'Enter your choice (1-4):',
-      validate: (input) => {
-        const valid = ['1', '2', '3', '4'].includes(input);
-        return valid || 'Invalid choice. Please select 1-4.';
-      }
+      message: 'Select an option:',
+      choices: [
+        { name: chalk.cyan('Create new project') + chalk.gray(' - Generate a new Express project'), value: '1' },
+        { name: chalk.cyan('Start a project') + chalk.gray(' - Run an existing project'), value: '2' },
+        { name: chalk.cyan('Credits') + chalk.gray(' - View creator info'), value: '3' },
+        { name: chalk.cyan('Exit') + chalk.gray(' - Close the application'), value: '4' }
+      ]
     }
   ]);
 
@@ -164,10 +160,14 @@ async function createNewProject(config = {}) {
 
   const { installExpress } = await inquirer.prompt([
     {
-      type: 'confirm',
+      type: 'list',
       name: 'installExpress',
       message: 'Do you want to install Express?',
-      default: true
+      choices: [
+        { name: chalk.green('Yes') + chalk.gray(' - Install Express and dependencies'), value: true },
+        { name: chalk.red('No') + chalk.gray(' - Skip Express installation'), value: false }
+      ],
+      default: 'Yes'
     }
   ]);
 
@@ -185,20 +185,15 @@ async function createNewProject(config = {}) {
     console.log(chalk.green(`Language: ${language.charAt(0).toUpperCase() + language.slice(1)}`));
     console.log();
   } else {
-    console.log('Select your language:');
-    console.log(chalk.yellow('[1] ') + 'JavaScript');
-    console.log(chalk.blue('[2] ') + 'TypeScript');
-    console.log();
-    
     const { languageChoice } = await inquirer.prompt([
       {
-        type: 'input',
+        type: 'list',
         name: 'languageChoice',
-        message: 'Enter your choice (1 or 2):',
-        validate: (input) => {
-          const valid = ['1', '2'].includes(input);
-          return valid || 'Invalid choice. Please select 1 or 2.';
-        }
+        message: 'Select your language:',
+        choices: [
+          { name: chalk.yellow('JavaScript') + chalk.gray(' - Fast and flexible'), value: '1' },
+          { name: chalk.blue('TypeScript') + chalk.gray(' - Type-safe development'), value: '2' }
+        ]
       }
     ]);
 
@@ -217,21 +212,16 @@ async function createNewProject(config = {}) {
   let packageManager = 'npm';
 
   if (installExpress) {
-    console.log('Select your path alias style:');
-    console.log('[1] @ (e.g., @/controllers, @/models)');
-    console.log('[2] / (e.g., /controllers, /models)');
-    console.log('[3] None');
-    console.log();
-    
     const { aliasChoice } = await inquirer.prompt([
       {
-        type: 'input',
+        type: 'list',
         name: 'aliasChoice',
-        message: 'Enter your choice (1-3):',
-        validate: (input) => {
-          const valid = ['1', '2', '3'].includes(input);
-          return valid || 'Invalid choice. Please select a number from 1 to 3.';
-        }
+        message: 'Select your path alias style:',
+        choices: [
+          { name: chalk.green('@') + chalk.gray(' - Clean imports'), value: '1' },
+          { name: chalk.blue('/') + chalk.gray(' - Clean imports'), value: '2' },
+          { name: chalk.gray('None') + chalk.gray(' - No alias'), value: '3' }
+        ]
       }
     ]);
 
@@ -244,20 +234,15 @@ async function createNewProject(config = {}) {
     aliasSpinner.succeed(chalk.green(`Path alias style set to: ${aliasStyle === 'none' ? 'None' : aliasStyle}`));
     console.log();
 
-    console.log('Select your package manager:');
-    console.log(chalk.yellow('[1] ') + 'Bun');
-    console.log(chalk.red('[2] ') + 'npm');
-    console.log();
-    
     const { packageChoice } = await inquirer.prompt([
       {
-        type: 'input',
+        type: 'list',
         name: 'packageChoice',
-        message: 'Enter your choice (1 or 2):',
-        validate: (input) => {
-          const valid = ['1', '2'].includes(input);
-          return valid || 'Invalid choice. Please select 1 or 2.';
-        }
+        message: 'Select your package manager:',
+        choices: [
+          { name: chalk.yellow('Bun') + chalk.gray(' - Lightning fast'), value: '1' },
+          { name: chalk.red('npm') + chalk.gray(' - Standard'), value: '2' }
+        ]
       }
     ]);
 
@@ -271,23 +256,18 @@ async function createNewProject(config = {}) {
     console.log();
   }
 
-  console.log('Select your database:');
-  console.log(chalk.yellow('[1] ') + 'SQL (MySQL)');
-  console.log(chalk.cyan('[2] ') + 'SQLite');
-  console.log(chalk.green('[3] ') + 'MongoDB');
-  console.log(chalk.green('[4] ') + 'Supabase');
-  console.log(chalk.gray('[5] ') + 'None');
-  console.log();
-  
   const { databaseChoice } = await inquirer.prompt([
     {
-      type: 'input',
+      type: 'list',
       name: 'databaseChoice',
-      message: 'Enter your choice (1-5):',
-      validate: (input) => {
-        const valid = ['1', '2', '3', '4', '5'].includes(input);
-        return valid || 'Invalid choice. Please select a number from 1 to 5.';
-      }
+      message: 'Select your database:',
+      choices: [
+        { name: chalk.yellow('SQL (MySQL)') + chalk.gray(' - Popular relational'), value: '1' },
+        { name: chalk.cyan('SQLite') + chalk.gray(' - Lightweight file-based'), value: '2' },
+        { name: chalk.green('MongoDB') + chalk.gray(' - Flexible NoSQL'), value: '3' },
+        { name: chalk.green('Supabase') + chalk.gray(' - Open-source Firebase'), value: '4' },
+        { name: chalk.gray('None') + chalk.gray(' - No database'), value: '5' }
+      ]
     }
   ]);
 
@@ -301,20 +281,15 @@ async function createNewProject(config = {}) {
   dbSpinner.succeed(chalk.green(`Database set to: ${database.charAt(0).toUpperCase() + database.slice(1)}`));
   console.log();
 
-  console.log('Select your storage:');
-  console.log(chalk.blue('[1] ') + 'Cloudinary');
-  console.log(chalk.gray('[2] ') + 'None');
-  console.log();
-  
   const { storageChoice } = await inquirer.prompt([
     {
-      type: 'input',
+      type: 'list',
       name: 'storageChoice',
-      message: 'Enter your choice (1 or 2):',
-      validate: (input) => {
-        const valid = ['1', '2'].includes(input);
-        return valid || 'Invalid choice. Please select 1 or 2.';
-      }
+      message: 'Select your storage:',
+      choices: [
+        { name: chalk.blue('Cloudinary') + chalk.gray(' - Cloud image storage'), value: '1' },
+        { name: chalk.gray('None') + chalk.gray(' - No storage'), value: '2' }
+      ]
     }
   ]);
 
@@ -1051,20 +1026,15 @@ async function startProject(config = {}) {
     console.log(chalk.green(`Command: ${runCommand}`));
     console.log();
   } else {
-    console.log('Select your package manager:');
-    console.log(chalk.cyan('[1] ') + chalk.yellow('Bun'));
-    console.log(chalk.cyan('[2] ') + chalk.red('npm'));
-    console.log();
-    
     const { packageManagerChoice } = await inquirer.prompt([
       {
-        type: 'input',
+        type: 'list',
         name: 'packageManagerChoice',
-        message: 'Enter your choice (1 or 2):',
-        validate: (input) => {
-          const valid = ['1', '2'].includes(input);
-          return valid || 'Invalid choice. Please select 1 or 2.';
-        }
+        message: 'Select your package manager:',
+        choices: [
+          { name: chalk.yellow('Bun') + chalk.gray(' - Lightning fast'), value: '1' },
+          { name: chalk.red('npm') + chalk.gray(' - Standard'), value: '2' }
+        ]
       }
     ]);
 
