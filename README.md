@@ -16,13 +16,25 @@ A powerful CLI tool designed to make backend development easier by automating th
 ## Installation
 
 ```bash
-npm install -g express-instant
+npm install -g express-fastexp
 ```
 
 Or use with npx:
 
 ```bash
-npx express-instant
+npx express-fastexp
+```
+
+Or use with bun:
+
+```bash
+bun install -g express-fastexp
+```
+
+Or use with bunx:
+
+```bash
+bunx express-fastexp
 ```
 
 ## Usage
@@ -32,7 +44,7 @@ npx express-instant
 Run the CLI without arguments to enter interactive mode:
 
 ```bash
-express-instant
+express-fastexp
 ```
 
 This will display the main menu with options:
@@ -47,13 +59,13 @@ This will display the main menu with options:
 
 **Basic usage:**
 ```bash
-express-instant create [project-name]
+express-fastexp create [project-name]
 ```
 This auto-selects "Create new project" and skips the project name prompt, going directly to language selection.
 
 **With language:**
 ```bash
-express-instant create [project-name] [language]
+express-fastexp create [project-name] [language]
 ```
 Skips both project name and language prompts.
 
@@ -64,26 +76,26 @@ Skips both project name and language prompts.
 **Examples:**
 ```bash
 # Create project with name only (prompts for language)
-express-instant create my-project
+express-fastexp create my-project
 
 # Create TypeScript project
-express-instant create my-project ts
+express-fastexp create my-project ts
 
 # Create JavaScript project
-express-instant create my-project js
+express-fastexp create my-project js
 ```
 
 #### Start a Project
 
 **Basic usage:**
 ```bash
-express-instant start [path]
+express-fastexp start [path]
 ```
 Auto-selects "Start a project" and skips the project path prompt, going directly to package manager selection.
 
 **With all options:**
 ```bash
-express-instant start [path] [package-manager] [command]
+express-fastexp start [path] [package-manager] [command]
 ```
 Skips all prompts and directly runs the project.
 
@@ -94,16 +106,16 @@ Skips all prompts and directly runs the project.
 **Examples:**
 ```bash
 # Start with path only (prompts for package manager and command)
-express-instant start ./my-project
+express-fastexp start ./my-project
 
 # Start with Bun
-express-instant start ./my-project bun "npm run dev"
+express-fastexp start ./my-project bun "npm run dev"
 
 # Start with npm
-express-instant start ./my-project npm "nodemon"
+express-fastexp start ./my-project npm "nodemon"
 
 # Start with custom command
-express-instant start ./my-project bun "bun run index.js"
+express-fastexp start ./my-project bun "bun run index.js"
 ```
 
 ## Project Configuration
@@ -188,7 +200,7 @@ After creating a project, you can start it in two ways:
 
 ### Option 1: Use the CLI
 ```bash
-express-instant start ./my-project bun "npm run dev"
+express-fastexp start ./my-project bun "npm run dev"
 ```
 
 ### Option 2: Manual start
@@ -235,7 +247,7 @@ CLOUDINARY_API_SECRET=your_api_secret
 **Created by Jhon Ladines**
 
 - Website: https://www.jhonladines.top/
-- Repository: https://github.com/Allvexnation/express-instant
+- Repository: https://github.com/Allvexnation/express-fastexp
 
 ## License
 
@@ -243,4 +255,4 @@ MIT
 
 ---
 
-**Express Instant** - No more manually creating folders, files, and packages! 🚀
+**Express FastExp** - No more manually creating folders, files, and packages! 🚀
