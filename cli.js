@@ -481,10 +481,14 @@ async function createExpressProject(config) {
       // Ask if user wants to start the server now
       const { startNow } = await inquirer.prompt([
         {
-          type: 'confirm',
+          type: 'list',
           name: 'startNow',
           message: 'Do you want to start the server now?',
-          default: true
+          choices: [
+            { name: chalk.green('Yes'), value: true },
+            { name: chalk.red('No'), value: false }
+          ],
+          default: 0
         }
       ]);
 
@@ -1183,7 +1187,7 @@ async function showCredits() {
   console.log();
   console.log('  Website: ' + chalk.blue('https://www.jhonladines.top/'));
   console.log();
-  console.log('  Repository: ' + chalk.blue('https://github.com/Allvexnation/express-instant'));
+  console.log('  Repository: ' + chalk.blue('https://github.com/Allvexnation/express-fastexp'));
   console.log();
   console.log(chalk.cyan('  ========================================'));
   console.log(chalk.green('  Thank you for using Express Instant!'));
