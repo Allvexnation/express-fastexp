@@ -20,6 +20,12 @@ A powerful CLI tool designed to make backend development easier by automating th
 - ⚡ Beautiful loading spinners with colors and animations
 - 🎯 CLI argument support for quick project creation and startup
 
+## Updates
+
+### Latest Update
+- **Improved CLI Design** - Enhanced user interface with better visual design and more intuitive navigation
+- **Code Restructuring** - Refactored the entire codebase into modular chunks for better organization and maintainability
+
 ## Installation
 
 ```bash
