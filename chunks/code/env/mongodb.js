@@ -1,0 +1,7 @@
+const mongodbEnvTemplate = () => {
+  return 'MONGODB_URI=mongodb://127.0.0.1:27017/your_database\n';
+};
+
+module.exports = {
+  mongodbEnvTemplate
+};
