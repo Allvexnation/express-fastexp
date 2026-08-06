@@ -1,6 +1,6 @@
 {
   "name": "express-fastexp",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "A powerful CLI tool designed to make backend development easier by automating the creation of Express.js projects with improved design and modular code structure",
   "main": "index.js",
   "bin": {
