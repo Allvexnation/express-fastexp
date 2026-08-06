@@ -23,6 +23,11 @@ A powerful CLI tool designed to make backend development easier by automating th
 ## Updates
 
 ### Latest Update
+- **Version Enforcement** - Added automatic version check to ensure users have the latest version, blocking outdated versions from running and prompting for update (08/06/2026 4:16 PM)
+- **Interactive Start Menu** - Added menu to choose between entering project path manually or browsing folders with arrow keys (08/06/2026 4:16 PM)
+- **Enhanced Project Verification** - Three-layer verification checking package.json dependencies, raw content, and source code imports for Express (08/06/2026 4:16 PM)
+- **Folder Browser** - Navigate file system with arrow keys, no loop scrolling, hidden dot folders, and smart path resolution (08/06/2026 4:16 PM)
+- **Folder Size Display** - Added automatic folder size calculation and display after project creation, showing the total size in human-readable format (Bytes, KB, MB, GB) (08/06/2026 4:16 PM)
 - **Improved CLI Design** - Enhanced user interface with better visual design and more intuitive navigation
 - **Code Restructuring** - Refactored the entire codebase into modular chunks for better organization and maintainability
 
@@ -209,14 +214,41 @@ Additional packages based on your choices:
 
 ## Starting Your Project
 
-After creating a project, you can start it in two ways:
+After creating a project, you can start it in multiple ways:
 
 ### Option 1: Use the CLI
 ```bash
 express-fastexp start ./my-project bun "npm run dev"
 ```
 
-### Option 2: Manual start
+### Option 2: Interactive Start Menu
+Run the CLI and select "Start a project" from the main menu. You'll be presented with two options:
+
+1. **Enter project path manually** - Type the full path or folder name of your project
+   - Supports full paths: `C:\Users\jhonj\Downloads\my-project`
+   - Supports relative paths: `my-project` or `./my-project`
+   - Supports folder names only: `my-project` (system will search in user directory)
+   - Supports nested paths: `portfolio\backend` (system will navigate to parent folder)
+
+2. **Browse folders** - Navigate through your file system using arrow keys
+   - Starts in your user home directory
+   - Navigate with arrow keys (no loop scrolling)
+   - Hidden dot folders (folders starting with `.`)
+   - Select "✅ Select this directory" when you find your project
+   - Go back with "⬆️ .. (Go back)"
+
+### Enhanced Project Verification
+The system automatically verifies that your project is a valid Express project by checking:
+- **package.json** - for express in dependencies or devDependencies
+- **Raw package.json content** - for the word "express" anywhere in the file
+- **Source code imports** - for express require/import statements in common entry files:
+  - Root directory: `index.js`, `server.js`, `app.js`, `main.js` (and `.ts` equivalents)
+  - `src` folder: same files if it exists
+
+### Folder Size Display
+When a valid Express project is found, the system displays the folder size (e.g., "Folder size: 15.2 MB").
+
+### Option 3: Manual start
 ```bash
 cd my-project
 npm run dev  # or bun run dev

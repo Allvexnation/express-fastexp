@@ -11,6 +11,8 @@ const { createGitignore } = require('./code/github/gitignore');
 const { createEnvFiles } = require('./code/env/env');
 const { createNodemonJson } = require('./code/nodemon/nodemon');
 const { updatePackageJson, createTsConfig } = require('./code/alias/alias');
+const { createProjectFolders, createTemplatesFolder } = require('./code/functions/create-folders/CreateFolders');
+const { createProjectFiles, createTemplateFile, createServerFile } = require('./code/functions/create-files/CreateFiles');
 
 async function createNewProject(config = {}) {
   const { projectName: initialProjectName, language: cliLanguage } = config;
@@ -245,10 +247,7 @@ async function createExpressProject(config) {
 
   try {
     // Create directories
-    const dirs = ['config', 'models', 'middleware', 'controllers', 'routes'];
-    for (const dir of dirs) {
-      await fs.ensureDir(path.join(projectPath, dir));
-    }
+    await createProjectFolders(projectPath);
 
     spinner.succeed(chalk.green.bold('✓ Project structure created'));
 
@@ -332,6 +331,7 @@ async function createExpressProject(config) {
 
     // Create template file with start page
     if (installExpress) {
+      await createTemplatesFolder(projectPath);
       await createTemplateFile(projectPath, language, aliasStyle);
     }
 
@@ -353,6 +353,11 @@ async function createExpressProject(config) {
     console.log(`Language: ${language}`);
     console.log(`Database: ${database}`);
     console.log(`Storage: ${storage}`);
+
+    // Calculate and display folder size
+    const folderSize = await getFolderSize(projectPath);
+    const formattedSize = formatSize(folderSize);
+    console.log(`Project Folder Size: ${formattedSize}`);
     
     if (installExpress) {
       console.log(`Package Manager: ${packageManager}`);
@@ -464,98 +469,8 @@ async function installStoragePackages(projectPath, storage, packageManager, spin
   }
 }
 
-async function createProjectFiles(projectPath, language, database, storage, aliasStyle) {
-  const extension = language === 'typescript' ? 'ts' : 'js';
 
-  // Create empty files
-  await fs.writeFile(path.join(projectPath, 'controllers', `controller.${extension}`), '');
-  await fs.writeFile(path.join(projectPath, 'config', `jwt.${extension}`), '');
-  await fs.writeFile(path.join(projectPath, 'middleware', `middleware.${extension}`), '');
-  await fs.writeFile(path.join(projectPath, 'routes', `route.${extension}`), '');
 
-  if (database === 'mongodb') {
-    await fs.writeFile(path.join(projectPath, 'models', `model.${extension}`), '');
-  }
-
-  if (database === 'sql') {
-    await fs.writeFile(path.join(projectPath, 'config', `sql.${extension}`), '');
-  }
-
-  if (database === 'sqlite') {
-    await fs.writeFile(path.join(projectPath, 'config', `sqlite.${extension}`), '');
-  }
-
-  if (database === 'mongodb') {
-    await fs.writeFile(path.join(projectPath, 'config', `mongodb.${extension}`), '');
-  }
-
-  if (database === 'supabase') {
-    await fs.writeFile(path.join(projectPath, 'config', `supabase.${extension}`), '');
-  }
-
-  if (storage === 'cloudinary') {
-    await fs.writeFile(path.join(projectPath, 'config', `cloudinary.${extension}`), '');
-  }
-}
-
-async function createTemplateFile(projectPath, language, aliasStyle) {
-  const extension = language === 'typescript' ? 'ts' : 'js';
-  
-  // Create templates directory
-  await fs.ensureDir(path.join(projectPath, 'templates'));
-  
-  // Read from the template file based on language
-  const templatePath = path.join(__dirname, 'code', 'templates', language, `start.${extension}`);
-  const content = await fs.readFile(templatePath, 'utf-8');
-
-  await fs.writeFile(path.join(projectPath, 'templates', `start.${extension}`), content);
-}
-
-async function createServerFile(projectPath, language, aliasStyle, installExpress) {
-  // Determine import path based on alias style
-  let importPath;
-  if (aliasStyle === '@') {
-    importPath = `${aliasStyle}/templates/start`;
-  } else if (aliasStyle === '/') {
-    importPath = `${aliasStyle}templates/start`;
-  } else {
-    importPath = './templates/start';
-  }
-
-  // Determine which template file to use
-  let templateFile;
-  if (language === 'javascript') {
-    if (installExpress) {
-      if (aliasStyle === '@' || aliasStyle === '/') {
-        templateFile = 'index.js';
-      } else {
-        templateFile = 'index-no-alias.js';
-      }
-    } else {
-      if (aliasStyle === '@' || aliasStyle === '/') {
-        templateFile = 'index-no-express-alias.js';
-      } else {
-        templateFile = 'index-no-express-no-alias.js';
-      }
-    }
-  } else {
-    if (installExpress) {
-      templateFile = 'index.ts';
-    } else {
-      templateFile = 'index-no-express.ts';
-    }
-  }
-
-  // Read from the template file
-  const templatePath = path.join(__dirname, 'code', 'server', language, templateFile);
-  let content = await fs.readFile(templatePath, 'utf-8');
-
-  // Replace the importPath placeholder
-  content = content.replace('{{importPath}}', importPath);
-
-  const filename = language === 'typescript' ? 'index.ts' : 'index.js';
-  await fs.writeFile(path.join(projectPath, filename), content);
-}
 
 async function getDirectoryTree(dirPath, prefix = '', excludeDirs = ['node_modules', '.git']) {
   try {
@@ -591,6 +506,49 @@ async function getDirectoryTree(dirPath, prefix = '', excludeDirs = ['node_modul
     // Return empty string if directory can't be read
     return '';
   }
+}
+
+async function getFolderSize(dirPath) {
+  let totalSize = 0;
+
+  async function calculateSize(currentPath) {
+    try {
+      const items = await fs.readdir(currentPath);
+      
+      for (const item of items) {
+        const itemPath = path.join(currentPath, item);
+        
+        try {
+          const stats = await fs.stat(itemPath);
+          
+          if (stats.isDirectory()) {
+            await calculateSize(itemPath);
+          } else {
+            totalSize += stats.size;
+          }
+        } catch (statError) {
+          // Skip files that can't be accessed
+          continue;
+        }
+      }
+    } catch (readError) {
+      // Skip directories that can't be read
+      return;
+    }
+  }
+
+  await calculateSize(dirPath);
+  return totalSize;
+}
+
+function formatSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 }
 
 async function generateReadme(projectPath, projectName, language, database, storage, packageManager, installExpress) {
@@ -717,10 +675,9 @@ module.exports = {
   createExpressProject,
   installDatabasePackages,
   installStoragePackages,
-  createProjectFiles,
-  createTemplateFile,
-  createServerFile,
   getDirectoryTree,
+  getFolderSize,
+  formatSize,
   generateReadme,
   startServerWithBrowser
 };

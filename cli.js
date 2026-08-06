@@ -7,9 +7,13 @@ const fs = require('fs-extra');
 const path = require('path');
 const { execSync, spawn } = require('child_process');
 const open = require('open');
-const { mainMenu } = require('./chunks/MainMenu');
 
 const packageJson = require('./package.json');
+const { checkForUpdates } = require('./chunks/code/updates/CheckUpdates');
+const { mainMenu } = require('./chunks/MainMenu');
+
+// Run version check
+checkForUpdates(packageJson);
 
 // Parse command-line arguments
 const args = process.argv.slice(2);
